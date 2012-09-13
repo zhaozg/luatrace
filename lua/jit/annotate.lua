@@ -295,7 +295,10 @@ local function annotate_report(report_file)
       end,
       function(tr, r)
         if not tr.status then
-          r.line = source_map[tr.abort.info.source][tr.abort.info.currentline]
+          local src = source_map[tr.abort.info.source]
+          if src then
+            r.line = src[tr.abort.info.currentline]
+          end
         end
       end)
   report_summary(report_file, results, result_map, total, true)
@@ -364,7 +367,12 @@ local function annotate_report(report_file)
         for k = bl.linedefined, bl.first_line - 1 do
           report_file:write(bc_format:format(" "))
           report_file:write((" | %4d"):format(k))
-          report_file:write((" | %s\n"):format(source_map[bl.source][k]))
+          local src = source_map[bl.source]
+          if src then
+            report_file:write((" | %s\n"):format(src[k]))
+          else
+            report_file:write((" | <<no code>>:%s:%d\n"):format(bl.source, k))
+          end
         end
       end
       for k, line in ipairs(bl.lines) do
@@ -372,7 +380,12 @@ local function annotate_report(report_file)
           report_file:write(bc_format:format(b))
           if l == 1 then
             report_file:write((" | %4d"):format(line.number))
-            report_file:write((" | %s\n"):format(source_map[bl.source][line.number]))
+            local src = source_map[bl.source]
+            if src then
+              report_file:write((" | %s\n"):format(src[line.number]))
+            else
+              report_file:write((" | <<no code>>:%s:%d\n"):format(bl.source, line.number))
+            end
           else
             report_file:write(" |    . |\n")
           end
@@ -382,7 +395,12 @@ local function annotate_report(report_file)
         for k = bl.last_line + 1, bl.lastlinedefined do
           report_file:write(bc_format:format(" "))
           report_file:write((" | %4d"):format(k))
-          report_file:write((" | %s\n"):format(source_map[bl.source][k]))
+          local src = source_map[bl.source]
+          if src then
+            report_file:write((" | %s\n"):format(src[k]))
+          else
+            report_file:write((" | <<no code>>:%s:%d\n"):format(bl.source, k))
+          end
         end
       end
     end
@@ -415,7 +433,12 @@ end
 
 local function shutdown()
   annotate_off()
-  if not reported then annotate_report() end
+  if not reported then
+    local status, err = xpcall(annotate_report, debug.traceback)
+    if not status then
+      print("------------------ annotate_report:", status, err)
+    end
+  end
 end
 
 local rawexit = os.exit
