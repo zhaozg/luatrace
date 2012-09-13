@@ -227,6 +227,9 @@ local function report_summary(file, results, result_map, total, show_lines)
   for _, r in ipairs(results) do
     status_length = math.max(status_length, #r.status)
   end
+  if status_length > 99 then
+    status_length = 99
+  end
 
   local header_format = "%-"..status_length.."s\t%15s\t%15s\t%15s"
   local line_format = "%-"..status_length.."s\t%8d (%3d%%)\t%8d (%3d%%)\t%8d (%3d%%)"
