@@ -14,7 +14,7 @@ CFLAGS=-O3 -Wall -Wextra -pedantic
 UNAME=$(shell uname -s)
 ifneq (,$(findstring Darwin,$(UNAME)))
   # OS X
-  CFLAGS:=$(CFLAGS) -fPIC -arch i686 -arch x86_64 -std=c89
+  CFLAGS:=$(CFLAGS) -fPIC -arch x86_64 -std=c89
   SHARED=-bundle -undefined dynamic_lookup
   SO_SUFFIX=so
 else
