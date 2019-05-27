@@ -1,12 +1,19 @@
-LUA=${1:-lua}
+#!/bin/sh
 
-cd lua
+if [ -z $LUA ]; then
+LUA=${1:-lua}
+fi
+OLUA_PATH=${LUA_PATH}
+export LUA_PATH=lua/?.lua
+
 for f in test/*.lua
 do
   echo Testing $LUA $f
   $LUA $f
-  luatrace.profile
+  sh/luatrace.profile
   rm trace-out.txt
   echo
 done
-cd ..
+
+export LUA_PATH=${OLUA_PATH}
+
