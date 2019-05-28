@@ -1,3 +1,3 @@
 
-lua -e "require('luatrace.profile').go('$1')"
+luajit -e "require('luatrace.profile').go('$1')"
 

@@ -1,28 +1,29 @@
 local DEFAULT_RECORDER = "luatrace.trace_file"
 
-
--- Check if the ffi is available, and get a handle on the c library's clock.
--- LuaJIT doesn't compile traces containing os.clock yet.
-local ffi
-if jit and jit.status and jit.status() then
-  local ok
-  ok, ffi = pcall(require, "ffi")
-  if ok then
-    ffi.cdef("unsigned long clock(void);") 
-  else
-    ffi = nil
-  end
-end
-
 -- See if the c hook is available
 local c_hook
 do
   local ok
   ok, c_hook = pcall(require, "luatrace.c_hook")
+  assert(ok, package.cpath)
   if not ok then
     c_hook = nil
   end
 end
+
+-- Check if the ffi is available, and get a handle on the c library's clock.
+-- LuaJIT doesn't compile traces containing os.clock yet.
+local jit, ffi = jit, nil
+if jit and jit.status and jit.status() then
+  local ok
+  ok, ffi = pcall(require, "ffi")
+  if ok then
+    ffi.cdef("unsigned long clock(void);")
+  else
+    ffi = nil
+  end
+end
+
 
 
 -- Stack counting --------------------------------------------------------------
@@ -122,7 +123,7 @@ local function record(action, line, time)
   elseif action == "call" or action == "return" then
     local callee = debug.getinfo(CALLEE_INDEX, "Sln")
     local caller = debug.getinfo(CALLER_INDEX, "Sl")
-    
+
     if action == "call" then
       local c = was_that_a_tailcall() and "T" or ">"
       if should_trace(caller) then
@@ -150,7 +151,7 @@ local function record(action, line, time)
           set_current_line(ACCUMULATE_TO_NEXT)
           recorder.record("P")                  -- resume is protected
           -- Watch the current thread and catch it if it changes.
-          watch_thread = coroutine.running() or "main"          
+          watch_thread = coroutine.running() or "main"
         else                                    -- this might be a resume!
           -- Because of coroutine.wrap, any c function could resume a different
           -- thread.  Watch the current thread and catch it if it changes.

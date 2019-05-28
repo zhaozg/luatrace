@@ -3,17 +3,13 @@
 if [ -z $LUA ]; then
 LUA=${1:-lua}
 fi
-OLUA_PATH=${LUA_PATH}
-export LUA_PATH=lua/?.lua
 
 for f in test/*.lua
 do
   echo Testing $LUA $f
-  $LUA $f
-  sh/luatrace.profile
+  LUA_PATH=lua/?.lua LUA_CPATH=lua/?.so $LUA $f
+  LUA_PATH=lua/?.lua LUA_CPATH=lua/?.so sh/luatrace.profile
   rm trace-out.txt
   echo
 done
-
-export LUA_PATH=${OLUA_PATH}
 

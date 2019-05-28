@@ -1,3 +1,5 @@
+require("luatrace").tron()
+
 -- run me with 'lua -luatrace command-line.lua'
 function b()
   return 1

@@ -1,3 +1,5 @@
+local bit = require'bit'
+
 local ok, jit = pcall(require, "jit")
 if not ok then
   local nofunc = function() end
@@ -63,7 +65,7 @@ end
 
 function trace_callbacks.abort(tr, func, pc, code, reason)
   local t = traces[tr][#traces[tr]]
-  local reason=fmterr(code, reason)
+  reason=fmterr(code, reason)
   reason = reason:gsub("bytecode (%d+)", function(c)
     c = tonumber(c) * 6
     return "bytecode "..vmdef.bcnames:sub(c, c+6):gsub(" ", "")
@@ -94,7 +96,12 @@ local function annotate_record(tr, func, pc, depth)
   end
   t.bytecode[#t.bytecode+1] = { pc=pc, bc=l, depth=depth, info=funcinfo(func, pc) }
   if pc >= 0 and bit.band(funcbc(func, pc), 0xff) < 16 then -- ORDER BC
-    t.bytecode[#t.bytecode+1] = { pc=pc, bc=bc.line(func, pc+1, prefix):sub(1,-2), depth=depth, info=funcinfo(func, pc) }
+    t.bytecode[#t.bytecode+1] = {
+      pc=pc,
+      bc=bc.line(func, pc+1, prefix):sub(1,-2),
+      depth=depth,
+      info=funcinfo(func, pc)
+    }
   end
 end
 

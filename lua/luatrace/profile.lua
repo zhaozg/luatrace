@@ -57,7 +57,7 @@ local function get_function(filename, line_defined, last_line_defined)
       child_time=0,
     }
     functions[name] = f
-    sff = sf.functions[line_defined]
+    local sff = sf.functions[line_defined]
     if not sff then
       sf.functions[line_defined] = { f }
     else

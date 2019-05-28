@@ -1,3 +1,5 @@
+require("luatrace").tron()
+
 function b() return 1 end
 function c() return 2 end
 a = b() + c()

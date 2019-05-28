@@ -1,11 +1,12 @@
 -- Write luatrace traces to a file. Each line is one of
--- [S>] <filename> <linedefined> <lastlinedefined>  -- Start or call into a trace at filename somewhere in the function defined at linedefined
--- <                                            -- Return from a function
--- R <thread_id>                                -- Resume the thread thread_id
--- Y                                            -- Yield
--- P                                            -- pcall - the current line is protected for the duration of the following call
--- E                                            -- Error - unwind the stack until you find a p.
--- <linenumber> <microseconds>                  -- Accumulate microseconds against linenumber
+-- [S>] <filename> <linedefined> <lastlinedefined>
+--                             -- Start or call into a trace at filename somewhere in the function defined at linedefined
+-- <                           -- Return from a function
+-- R <thread_id>               -- Resume the thread thread_id
+-- Y                           -- Yield
+-- P                           -- pcall - the current line is protected for the duration of the following call
+-- E                           -- Error - unwind the stack until you find a p.
+-- <linenumber> <microseconds> -- Accumulate microseconds against linenumber
 -- Usually, a line will have time accumulated to it before and after it calls a function, so
 -- function b() return 1 end
 -- function c() return 2 end
@@ -113,7 +114,7 @@ end
 
 function trace_file.read(settings)
   local do_not_close_file
-  
+
   settings = get_settings(settings)
 
   if settings.trace_file then
