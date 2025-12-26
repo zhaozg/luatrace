@@ -131,7 +131,7 @@ local function remove_duplicate_traces(traces)
         for _, tr2 in ipairs(trace_map[name]) do
           local same = #tr.bytecode == #tr2.bytecode
           if #tr.bytecode == #tr2.bytecode then
-            for i, b in ipairs(tr.bytecode) do
+            for _, b in ipairs(tr.bytecode) do
               if b.bc ~= tr2.bytecode[i].bc then
                 same = false
                 break
@@ -160,10 +160,10 @@ end
 local function load_source_files(traces)
   local source_map = {}
 
-  for i, tr in ipairs(traces) do
+  for _, tr in ipairs(traces) do
     if tr.start.source then source_map[tr.start.source] = true end
     if tr.stop.source then source_map[tr.stop.source] = true end
-    for k, b in ipairs(tr.bytecode) do
+    for _, b in ipairs(tr.bytecode) do
       if b.info.source then
         source_map[b.info.source] = true
       end
@@ -187,7 +187,7 @@ local function load_source_files(traces)
       source_map[source] = nil
     end
   end
-  
+
   return source_map
 end
 
@@ -195,9 +195,9 @@ end
 local function count_trace_results(traces, status_func, result_func)
   -- Run through all the traces counting bytecodes and lines by result
   local results, result_map = {}, {}
-  for i, tr in ipairs(traces) do
+  for _, tr in ipairs(traces) do
     local linecount, lines = 0, {}
-    for k, b in ipairs(tr.bytecode) do
+    for _, b in ipairs(tr.bytecode) do
       if b.info.source then
         local l = b.info.source..":"..b.info.currentline
         if not lines[l] then
@@ -224,7 +224,7 @@ local function count_trace_results(traces, status_func, result_func)
 
   -- Add up the totals
   local total = { traces=0, bytecodes=0, lines=0 }
-  for k, r in ipairs(results) do
+  for _, r in ipairs(results) do
     total.traces = total.traces + r.traces
     total.bytecodes = total.bytecodes + r.bytecodes
     total.lines = total.lines + r.lines
@@ -245,7 +245,7 @@ local function report_summary(file, results, result_map, total, show_lines)
 
   local header_format = "%-"..status_length.."s\t%15s\t%15s\t%15s"
   local line_format = "%-"..status_length.."s\t%8d (%3d%%)\t%8d (%3d%%)\t%8d (%3d%%)"
-  
+
   header_format = header_format..(show_lines and "\t%s\n" or "\n")
   line_format = line_format..(show_lines and "\t%s\n" or "\n")
 
@@ -265,7 +265,7 @@ local function report_summary(file, results, result_map, total, show_lines)
     end
   end
   rline3("Success")
-  for i, r in ipairs(results) do
+  for _, r in ipairs(results) do
     if r.status ~= "Success" then rline3(r.status) end
   end
   local D = "-"
@@ -299,7 +299,7 @@ local function annotate_report(report_file)
   report_summary(report_file, results, result_map, total)
 
   -- And then by abort line
-  local results, result_map, total = count_trace_results(traces,
+  results, result_map, total = count_trace_results(traces,
       function(tr)
         if tr.status then
           return "Success"
@@ -318,7 +318,7 @@ local function annotate_report(report_file)
   report_summary(report_file, results, result_map, total, true)
 
   -- Organise the traces into blocks
-  for i, tr in ipairs(traces) do
+  for _, tr in ipairs(traces) do
     local current_function
     local blocks = {}
     for _, b in ipairs(tr.bytecode) do
@@ -337,9 +337,9 @@ local function annotate_report(report_file)
         bl.first_line = math.min(bl.first_line, currentline)
         bl.last_line = math.max(bl.last_line, currentline)
         if not bl.line_map[currentline] then
-          local l = { number=currentline, bytecode={} }
-          bl.line_map[currentline] = l
-          bl.lines[#bl.lines+1] = l
+          local cl = { number=currentline, bytecode={} }
+          bl.line_map[currentline] = cl
+          bl.lines[#bl.lines+1] = cl
         end
         l = bl.line_map[currentline]
       else
@@ -350,23 +350,23 @@ local function annotate_report(report_file)
     tr.blocks = blocks
   end
 
-  for i, tr in ipairs(traces) do
-    for j, bl in ipairs(tr.blocks) do
+  for _, tr in ipairs(traces) do
+    for _, bl in ipairs(tr.blocks) do
       table.sort(bl.lines, function(a, b) return a.number < b.number end)
     end
   end
 
   -- How long is the longest bytecode line?
   local bclen = 0
-  for i, tr in ipairs(traces) do
-    for k, b in ipairs(tr.bytecode) do
+  for _, tr in ipairs(traces) do
+    for _, b in ipairs(tr.bytecode) do
       if #b.bc > bclen then bclen = #b.bc end
     end
   end
   local bc_format = ("%%-%ds"):format(bclen)
 
   report_file:write("TRACES\n======\n")
-  for i, tr in ipairs(traces) do
+  for _, tr in ipairs(traces) do
     report_file:write("\n")
     if tr.status then
       report_file:write(("Trace #%d"):format(tr.number))
@@ -376,7 +376,8 @@ local function annotate_report(report_file)
     report_file:write((" (%d lines, %d bytecodes, %d attempts)"):format(tr.linecount, #tr.bytecode, tr.attempts))
     report_file:write("\n")
     for j, bl in ipairs(tr.blocks) do
-      report_file:write(bc_format:format(" "), " | ", ("%s:%d-%d\n"):format(bl.source:sub(2,-1), bl.first_line, bl.last_line))
+      report_file:write(bc_format:format(" "), " | ",
+        ("%s:%d-%d\n"):format(bl.source:sub(2,-1), bl.first_line, bl.last_line))
       if j == 1 and bl.linedefined >= bl.first_line - 5 then
         for k = bl.linedefined, bl.first_line - 1 do
           report_file:write(bc_format:format(" "))
@@ -389,7 +390,7 @@ local function annotate_report(report_file)
           end
         end
       end
-      for k, line in ipairs(bl.lines) do
+      for _, line in ipairs(bl.lines) do
         for l, b in ipairs(line.bytecode) do
           report_file:write(bc_format:format(b))
           if l == 1 then
@@ -461,7 +462,7 @@ local function exit(...)
   rawexit(...)
 end
 
-
+local jit_annotate_shutdown
 local function annotate_on()
   active, reported = true, false
 

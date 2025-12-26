@@ -1,14 +1,15 @@
-LUA= $(shell echo `which lua`)
+LUAIMPL = $(shell echo `command -v luajit >/dev/null 2>&1  && echo 'luajit' || echo 'lua'`)
+LUA_VERSION = $(shell $(LUAIMPL) -e "print(_VERSION:match('%d+%.%d+'))")
+CFLAGS= $(shell pkg-config ${LUAIMPL} --cflags)
+
+LUA= $(shell echo `which $(LUAIMPL)`)
 LUA_BINDIR= $(shell echo `dirname $(LUA)`)
 LUA_PREFIX= $(shell echo `dirname $(LUA_BINDIR)`)
-LUA_SHAREDIR=$(LUA_PREFIX)/share/lua/5.1
-LUA_LIBDIR=$(LUA_PREFIX)/lib/lua/5.1
-LUA_H:= $(shell echo `find $(LUA_PREFIX)/include -name "lua.h"`)
-LUA_H:= $(shell echo `echo $(LUA_H) | cut -f 1 -d \ `)
-LUA_INCDIR= $(shell echo `dirname $(LUA_H)`)
+LUA_SHAREDIR=$(LUA_PREFIX)/share/lua/$(LUA_VERSION)
+LUA_LIBDIR=$(LUA_PREFIX)/lib/lua/$(LUA_VERSION)
 
-CC=/usr/bin/cc
-CFLAGS=-O3 -Wall -Wextra -pedantic
+
+CFLAGS+= -O3 -Wall -Wextra -pedantic
 
 # Guess a platform
 UNAME=$(shell uname -s)
@@ -42,7 +43,7 @@ endif
 endif
 
 lua/luatrace/c_hook.$(SO_SUFFIX): c/c_hook.c
-	$(CC) $(CFLAGS) $(SHARED) $^ -o $@ $(LIBS) -I$(LUA_INCDIR)
+	$(CC) $(CFLAGS) $(SHARED) $^ -o $@ $(LIBS)
 
 install: lua/luatrace/c_hook.$(SO_SUFFIX)
 	mkdir -p $(LUA_SHAREDIR)/luatrace
@@ -50,15 +51,13 @@ install: lua/luatrace/c_hook.$(SO_SUFFIX)
 	mkdir -p $(LUA_SHAREDIR)/jit
 	mkdir -p $(LUA_LIBDIR)/luatrace
 	cp lua/luatrace.lua $(LUA_SHAREDIR)
-	cp lua/uatrace.lua $(LUA_SHAREDIR)
 	cp lua/luatrace/*.lua $(LUA_SHAREDIR)/luatrace
-	cp lua/uatrace/*.lua $(LUA_SHAREDIR)/uatrace
 	-cp lua/luatrace/c_hook.so $(LUA_LIBDIR)/luatrace
 	cp sh/luatrace.profile $(LUA_BINDIR)
 	chmod +x $(LUA_BINDIR)/luatrace.profile
 	cp lua/jit/annotate.lua $(LUA_SHAREDIR)/jit
 
-uninstall: 
+uninstall:
 	rm -f $(LUA_SHAREDIR)/luatrace.lua
 	rm -f $(LUA_SHAREDIR)/uatrace.lua
 	rm -rf $(LUA_SHAREDIR)/luatrace
