@@ -118,7 +118,10 @@ local function record(action, line, time)
 
   if action == "line" then
     count_stack()
-    set_current_line(line)
+    local callee = debug.getinfo(CALLEE_INDEX, "Sln")
+    if should_trace(callee) then
+      set_current_line(line)
+    end
 
   elseif action == "call" or action == "return" then
     local callee = debug.getinfo(CALLEE_INDEX, "Sln")

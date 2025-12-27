@@ -42,6 +42,8 @@ endif
 endif
 endif
 
+.PHONY: install uninstall clean test
+
 lua/luatrace/c_hook.$(SO_SUFFIX): c/c_hook.c
 	$(CC) $(CFLAGS) $(SHARED) $^ -o $@ $(LIBS)
 
@@ -66,6 +68,10 @@ uninstall:
 	rm -f $(LUA_BINDIR)/luaprofile
 	rm -f $(LUA_BINDIR)/luatrace.profile
 	rm -f $(LUA_SHAREDIR)/jit/annotate.lua
+
+test:
+	LUA=$(LUAIMPL) ./run-tests
+	$(LUAIMPL) test-annotate.lua
 
 clean:
 	rm -f lua/luatrace/c_hook.so

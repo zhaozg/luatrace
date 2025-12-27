@@ -486,8 +486,11 @@ profile.troff = luatrace.troff
 
 -- Main ------------------------------------------------------------------------
 
-if arg and type(arg) == "table" and string.match(debug.getinfo(1, "S").short_src, arg[0]) then
-  profile.go()
+if arg and type(arg) == "table" and arg[0] then
+  local info = debug.getinfo(1, "S")
+  if info and info.short_src and string.match(info.short_src, arg[0]) then
+    profile.go()
+  end
 end
 
 
