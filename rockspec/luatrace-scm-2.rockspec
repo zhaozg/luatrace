@@ -21,8 +21,6 @@ build =
     luatrace = "lua/luatrace.lua",
     ["luatrace.profile"] = "lua/luatrace/profile.lua",
     ["luatrace.trace_file"] = "lua/luatrace/trace_file.lua",
-    uatrace = "lua/uatrace.lua",
-    ["uatrace.profile"] = "lua/uatrace/profile.lua",
     ["luatrace.c_hook"] = "c/c_hook.c",
     ["jit.annotate"] = "lua/jit/annotate.lua",
   },

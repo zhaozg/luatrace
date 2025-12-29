@@ -49,7 +49,6 @@ lua/luatrace/c_hook.$(SO_SUFFIX): c/c_hook.c
 
 install: lua/luatrace/c_hook.$(SO_SUFFIX)
 	mkdir -p $(LUA_SHAREDIR)/luatrace
-	mkdir -p $(LUA_SHAREDIR)/uatrace
 	mkdir -p $(LUA_SHAREDIR)/jit
 	mkdir -p $(LUA_LIBDIR)/luatrace
 	cp lua/luatrace.lua $(LUA_SHAREDIR)
@@ -61,7 +60,6 @@ install: lua/luatrace/c_hook.$(SO_SUFFIX)
 
 uninstall:
 	rm -f $(LUA_SHAREDIR)/luatrace.lua
-	rm -f $(LUA_SHAREDIR)/uatrace.lua
 	rm -rf $(LUA_SHAREDIR)/luatrace
 	rm -rf $(LUA_SHAREDIR)/uatrace
 	-rm -rf $(LUA_LIBDIR)/luatrace
