@@ -152,7 +152,7 @@ end
 local function pop()
   local frame = replay_pop()
   local thread = thread_top()
-  if thread.top == 0 then
+  if thread and thread.top == 0 then
     pop_thread()
     thread = thread_top()
   end
@@ -290,9 +290,9 @@ function profile.record(a, b, c, d)
 
       local line = get_line(line_number)
       if top.current_line ~= line then
-        line.hits = line.hits + 1
+        line.hits = line.hits and line.hits + 1 or 1
       end
-      line.self_time = line.self_time + time
+      line.self_time = (line.self_time or 0) + time
       top.func.self_time = top.func.self_time + time
       top.current_line = line
     end
